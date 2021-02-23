@@ -23,8 +23,8 @@
 
 **Sampling:** I was a little confused with the bilinear sampling. The gaussian went fine - I had completed the Blur function before working on this.
 
-Added: 
-- Ordered Dither
+**Added: 
+- Ordered Dither**
 
 **Original Image:**
 ![JellyFish](https://user-images.githubusercontent.com/59031606/108917069-c86d2c00-75f4-11eb-837c-1c95ceeba257.jpg)
