@@ -52,21 +52,37 @@ int main( int argc, char* argv[] ){
 	// parse arguments
 	while (argc > 0){
 		if (**argv == '-'){
-			if (!strcmp(*argv, "-input")){
+			if (!strcmp(*argv, "-input"))
+			{
 				CheckOption(*argv, argc, 2);
 				if (img != NULL)
 					delete img;
 				img = new Image(argv[1]);
 				argv += 2, argc -= 2;
 			}
-			else if (!strcmp(*argv, "-output")){
+
+			else if (!strcmp(*argv, "-output"))
+			{
 				CheckOption(*argv, argc, 2);
 				if (img == NULL) ShowUsage();
 				img->Write(argv[1]);
 				did_output = true;
 				argv += 2, argc -= 2;
 			}
-			else if (!strcmp(*argv, "-brightness")){
+
+			else if (!strcmp(*argv, "-noise"))
+			{
+				double factor;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				factor = atof(argv[1]);
+				img->AddNoise(factor);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-brightness"))
+			{
 				double factor;
 				CheckOption(*argv, argc, 2);
 				if (img == NULL) ShowUsage();
@@ -75,7 +91,31 @@ int main( int argc, char* argv[] ){
 				img->Brighten(factor);
 				argv += 2, argc -=2;
 			}
-			else if (!strcmp(*argv, "-crop")){
+
+			else if (!strcmp(*argv, "-contrast"))
+			{
+				double factor;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				factor = atof(argv[1]);
+				img->ChangeContrast(factor);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-saturation"))
+			{
+				double factor;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				factor = atof(argv[1]);
+				img->ChangeSaturation(factor);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-crop"))
+			{
 				int x, y, w, h;
 				CheckOption(*argv, argc, 5);
 				if (img == NULL) ShowUsage();
@@ -91,7 +131,9 @@ int main( int argc, char* argv[] ){
 
 				argv += 5, argc -= 5;
 			}
-			else if (!strcmp(*argv, "-extractChannel")){
+
+			else if (!strcmp(*argv, "-extractChannel"))
+			{
 				int channel;
 				CheckOption(*argv, argc, 2);
 				if (img == NULL) ShowUsage();
@@ -100,7 +142,9 @@ int main( int argc, char* argv[] ){
 				img->ExtractChannel(channel);
 				argv += 2, argc -= 2;
 			}
-			else if (!strcmp(*argv, "-quantize")){
+
+			else if (!strcmp(*argv, "-quantize"))
+			{
 				int nbits;
 				CheckOption(*argv, argc, 2);
 				if (img == NULL) ShowUsage();
@@ -109,16 +153,120 @@ int main( int argc, char* argv[] ){
 				img->Quantize(nbits);
 				argv += 2, argc -= 2;
 			}
-			else if (!strcmp(*argv, "-ppm_depth")){
-				int bits;
+
+			else if (!strcmp(*argv, "-randomDither"))
+			{
+				int nbits;
 				CheckOption(*argv, argc, 2);
 				if (img == NULL) ShowUsage();
 
-				bits = atof(argv[1]);
-				img->export_depth = bits;
-				argv += 2, argc -=2;
+				nbits = atoi(argv[1]);
+				img->RandomDither(nbits);
+				argv += 2, argc -= 2;
 			}
-			else{
+
+			else if (!strcmp(*argv, "-blur"))
+			{
+				int n;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				n = atoi(argv[1]);
+				img->Blur(n);
+				argv += 2, argc -= 2;
+			}
+			else if (!strcmp(*argv, "-sharpen"))
+			{
+				int n;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				n = atoi(argv[1]);
+				img->Sharpen(n);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-edgeDetect"))
+			{
+				if (img == NULL) ShowUsage();
+
+				img->EdgeDetect();
+				argv++, argc--;
+			}
+
+			else if (!strcmp(*argv, "-orderedDither"))
+			{
+				int nbits;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				nbits = atoi(argv[1]);
+				img->OrderedDither(nbits);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-FloydSteinbergDither"))
+			{
+				int nbits;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				nbits = atoi(argv[1]);
+				img->FloydSteinbergDither(nbits);
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-scale"))
+			{
+				CheckOption(*argv, argc, 3);
+				if (img == NULL) ShowUsage();
+
+				double sx = atof(argv[1]);
+				double sy = atof(argv[2]);
+
+				Image *dst = img->Scale(sx, sy);
+				delete img;
+
+				img = dst;
+				argv += 3, argc -= 3;
+			}
+
+			else if (!strcmp(*argv, "-rotate"))
+			{
+				double angle;
+				Image *dst;
+				CheckOption(*argv, argc, 2);
+				if (img == NULL) ShowUsage();
+
+				angle = atof(argv[1]);
+				dst = img->Rotate(angle);
+				delete img;
+				img = dst;
+				dst = NULL;
+				argv += 2, argc -= 2;
+			}
+
+			else if (!strcmp(*argv, "-fun"))
+			{
+				if (img == NULL) ShowUsage();
+
+				img->Fun();
+				argv++, argc--;
+			}
+
+			else if (!strcmp(*argv, "-sampling"))
+			{
+				if (img == NULL) ShowUsage();
+
+				int method;
+				CheckOption(*argv, argc, 2);
+				method = atoi(argv[1]);
+				img->SetSamplingMethod(method);
+				argv += 2, argc -= 2;
+			}
+
+			else
+			{
 				fprintf(stderr, "image: invalid option: %s\n", *argv);
 				ShowUsage();
 			}
