@@ -4,6 +4,7 @@
 ### Project Difficulties
 
 **Random Noise:** My only main problem here was the amount of noise to add with an increase in the factor number. 
+
 **Contrast & Saturation:** No significant problems here.
 **Sharpen:** Once I got the blur function in place, I had the original image, a blurred image, and interpolated from the blurred to the original.
 **Random Dither:** I'm not sure if there was a way to do this using the PixelQuant() function. I ended up modifying that function to add some noise. I did the same sort of process with the **Ordered Dither**.
