@@ -26,10 +26,7 @@
 Added: 
 - Ordered Dither
 
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
+**Original Image:**
+![image](https://user-images.githubusercontent.com/59031606/108894464-eed09e80-75d7-11eb-9a25-d3d02ad4257d.png)
 
 [Link](url) and ![Image](src){:height="200px" width="500px"}
