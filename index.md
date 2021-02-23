@@ -27,6 +27,36 @@ Added:
 - Ordered Dither
 
 **Original Image:**
-![image](https://user-images.githubusercontent.com/59031606/108894464-eed09e80-75d7-11eb-9a25-d3d02ad4257d.png)
+![JellyFish](https://user-images.githubusercontent.com/59031606/108917069-c86d2c00-75f4-11eb-837c-1c95ceeba257.jpg)
+
+**Random Noies**
+`./image -input JellyFish.jpg -noise 0.5 -output noisy_jelly.jpg`
+
+**Contrast**
+`./image -input JellyFish.jpg -noise 0.5 -output noisy_jelly.jpg`
+
+**Saturation**
+`./image -input JellyFish.jpg -noise 0.5 -output noisy_jelly.jpg`
+
+**Sharpen**
+
+**Random Dither**
+
+**Blur**
+
+**Edge Detect**
+`./image -input JellyFish.jpg -edgeDetect -output edgy_jelly.jpg`
+![edgy_jelly](https://user-images.githubusercontent.com/59031606/108917029-b8554c80-75f4-11eb-9681-9d745d560805.jpg)
+
+**Floyd-Steinberg Dither:**
+`./image -input JellyFish.jpg -FloydSteinbergDither 1 -output edgy_jelly.jpg`
+![floyd_dither_jelly](https://user-images.githubusercontent.com/59031606/108916965-a2e02280-75f4-11eb-8aac-58cafcb4756a.jpg)
+
+**Scale**
+
+**Sample**
+
+**Ordered Dither**
+
 
 [Link](url) and ![Image](src){:height="200px" width="500px"}
