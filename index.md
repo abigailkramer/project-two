@@ -1,22 +1,22 @@
 ## Project 2
 
-You can use the [editor on GitHub](https://github.com/abigailkramer/project-two/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
 ### Project Difficulties
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+**Random Noise:** My only main problem here was the amount of noise to add with an increase in the factor number. 
+**Contrast & Saturation:** No significant problems here.
+**Sharpen:** Once I got the blur function in place, I had the original image, a blurred image, and interpolated from the blurred to the original.
+**Random Dither:** I'm not sure if there was a way to do this using the PixelQuant() function. I ended up modifying that function to add some noise. I did the same sort of process with the **Ordered Dither**.
+**Blur:** I played around with this one a little bit, because I felt like I wasn't getting a significant increase in blur when I increased the n. I ended up using an n x n mask, along with using n as the standard deviation. I could visually see the difference between the initial and blurred images. Along with blurred and more blurred.
+**Edge Detect:** I used Sobel edge detection, and it went very smoothly when I got the matrix being applied correctly.
+**Floyd-Steinberg Dither:** This went pretty well once I understood what the quantization error really was. The code looks kinda ugly, but I needed to visualize what was happening with each pixel.
+**Scale:** I encountered some problems with indexing.
+**Rotate:** I encountered some problems with indexing.
+**Sampling:** I was a little confused with the bilinear sampling. The gaussian went fine - I had completed the Blur function before working on this.
 
-```markdown
-Syntax highlighted code block
+Added: 
+- Ordered Dither
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
 
 1. Numbered
 2. List
@@ -24,4 +24,3 @@ Syntax highlighted code block
 **Bold** and _Italic_ and `Code` text
 
 [Link](url) and ![Image](src)
-```
