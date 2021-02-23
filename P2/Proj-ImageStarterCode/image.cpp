@@ -170,8 +170,14 @@ void Image::AddNoise (double factor){
 		for (int j = 0; j < height; j++) {
 			Pixel p = GetPixel(i,j);
 			Pixel noise = p;
-			double n = (((double)rand()*(factor - (-factor)) / RAND_MAX) - factor);
-			noise = (noise + PixelRandom()*n);
+
+			// double n = (((double)rand()*(0.5 - (-0.5)) / RAND_MAX) -0.5);
+
+			noise = noise + PixelRandom()*factor;
+
+			// noise.r = noise.r + ComponentRandom()*factor;
+			// noise.g = noise.g + ComponentRandom()*factor;
+			// noise.b = noise.b + ComponentRandom()*factor;
 			
 			noise.SetClamp(noise.r,noise.g,noise.b);
 			GetPixel(i,j) = noise;
@@ -254,36 +260,27 @@ static int Bayer4[4][4] ={
 };
 
 
-void Image::OrderedDither(int nbits){		// lmao rip this is ec
+void Image::OrderedDither(int nbits){
 	/* WORK HERE */
-	
-	// i and j % nbits
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < height; j++) {
-         	Pixel e = GetPixel(i, j);
+	for (int i = 0; i < Width(); i++) {
+		for (int j = 0; j < Height(); j++) {
+			int x = i % 4;
+			int y = j % 4;
+			Pixel p = GetPixel(i,j);
+			int shift = 8-nbits;
+			float mult = 255/float(255 >> shift);
+			int new_r, new_g, new_b;
+			new_r = ((p.r >> shift) + Bayer4[x][y]-0.5 / 15.0);
+			new_g = ((p.g >> shift) + Bayer4[x][y]-0.5 / 15.0);
+			new_b = ((p.b >> shift) + Bayer4[x][y]-0.5 / 15.0);
 
-			int x = i % nbits;
-			int y = j % nbits;
-
-			e.r = e.r - trunc(e.r);
-			e.g = e.g - trunc(e.g);
-			e.b = e.b - trunc(e.b);
-
-			if (e.r > (Bayer4[x][y] << nbits)) { // scale threshold
-				e.r = ceil(e.r);
-			} else { e.r = floor(e.r); }
-
-			if ((e.g > Bayer4[x][y] << nbits)) { // scale threshold
-				e.g = ceil(e.g);
-			} else { e.g = floor(e.g); }
-
-			if ((e.b > Bayer4[x][y] << nbits)) { // scale threshold
-				e.b = ceil(e.b);
-			} else { e.r = floor(e.b); }
-			
-			GetPixel(i,j) = PixelQuant(e,nbits);
+			Pixel ret;
+			ret.SetClamp(new_r*mult , new_g*mult , new_b*mult );
+			GetPixel(i,j) = ret;
 		}
 	}
+
+	return;
 
 }
 
@@ -357,7 +354,7 @@ void Image::Blur(int n){
 
 					if ((new_y >= 0) && (new_x >= 0) && (new_y+1 < Height()) && (new_x+1 < Width())) {
 						Pixel p = GetPixel(i+x,j+y);
-						float weight = exp(-(x*x + y*y) / 2);
+						float weight = exp(-(x*x + y*y) / n);
 						r += p.r*weight;
 						g += p.g*weight;
 						b += p.b*weight;
@@ -396,51 +393,14 @@ void Image::Sharpen(int n){
 
 	for (int i = 0; i < Width(); i++) {
 		for (int j = 0; j < Height(); j++) {
-			r=g=b=0.0;
-			float div = 0.0;
-
-			for (int x = -n; x <= n; x++) {
-				for (int y = -n; y <= n; y++) {
-					int new_x = i+x;
-					int new_y = j+y;
-
-					if ((x == 0) && (y == 0)) {
-						Pixel p = GetPixel(i+x,j+y);
-						float weight = exp(-(x*x + y*y) / 2);
-						r += p.r*weight;
-						g += p.g*weight;
-						b += p.b*weight;
-
-						div += weight;
-					} else if ((new_y >= 0) && (new_x >= 0) && (new_y+1 < Height()) && (new_x+1 < Width())) {
-						Pixel p = GetPixel(i+x,j+y);
-						float weight = -exp(-(x*x + y*y) / 2); //(1.0/(sqrt(2*M_PI))) * 
-						r += p.r*weight;
-						g += p.g*weight;
-						b += p.b*weight;
-
-						// div += weight;
-					}
-				}
-			}
-
-			// r /= div;
-			// g /= div;
-			// b /= div;
-
-			Pixel n = Pixel((int)r,(int)g,(int)b);
-
-			// n.r = ComponentClamp(n.r);
-			// n.g = ComponentClamp(n.g);
-			// n.b = ComponentClamp(n.b);
-
-			img->GetPixel(i,j) = n;
-
+			Pixel p = GetPixel(i,j);
+			Pixel q = img->GetPixel(i,j);
+			Pixel sharp = PixelLerp(q,p,n);
+			GetPixel(i,j) = sharp;
 		}
 	}
 
-	this->data.raw = img->data.raw;
-	// img->~Image();
+	img->~Image();
 	return;
 }
 
@@ -448,67 +408,63 @@ void Image::Sharpen(int n){
 void Image::EdgeDetect(){
 	/* WORK HERE */
 
-	float r_x,g_x,b_x;
-	float r_y, g_y, b_y;
 	Image *img = new Image(*this);
-
 	int Gx[3][3] = {{1,0,-1}, {2,0,-2}, {1,0,-1}};
 	int Gy[3][3] = {{1,2,1}, {0,0,0}, {-1,-2,-1}};
 
+	int max = 20;
+	float mag_x, mag_y;
+
 	for (int i = 0; i < Width(); i++) {
 		for (int j = 0; j < Height(); j++) {
-			r_x=g_x=b_x=0;
-			r_y=g_y=b_y=0;
+			mag_x=mag_y=0;
 
-			if ((i == 0) || (i+1 == Width()) || (j == 0) || (j+1 == Height())) {
-				r_x=g_x=b_x=0;
-				r_y=g_y=b_y=0;
-			} else {
+			if (!(i == 0) && !(i+1 == Width()) && !(j == 0) && !(j+1 == Height())) {
 				for (int x = -1; x <= 1; x++) {
 					for (int y = -1; y <= 1; y++) {
+
 						Pixel p = GetPixel(x+i,y+j);
+						double r = p.r;
+						double g = p.g;
+						double b = p.b;
 
-						r_x += p.r * Gx[x+1][y+1];
-						g_x += p.g * Gx[x+1][y+1];
-						b_x += p.b * Gx[x+1][y+1];
-
-						r_y += p.r * Gy[x+1][y+1];
-						g_y += p.g * Gy[x+1][y+1];
-						b_y += p.b * Gy[x+1][y+1];
+						double intensity = r+g+b;
+						mag_x += intensity*Gx[x+1][y+1];
+						mag_y += intensity*Gy[x+1][y+1];
 					}
-				}
-
-				int mag_r = sqrt(r_x*r_x + r_y*r_y);
-				int mag_g = sqrt(g_x*g_x + g_y*g_y);
-				int mag_b = sqrt(b_x*b_x + b_y*b_y);
-				mag_r = ComponentClamp(mag_r);
-				mag_g = ComponentClamp(mag_g);
-				mag_b = ComponentClamp(mag_b);
-
-				img->GetPixel(i,j) = Pixel(mag_r,mag_g,mag_b);
+				}				
 			}
 
+			float mag = sqrt(mag_x*mag_x + mag_y*mag_y);
+			(mag > max) ? 255 : 0;
+			img->GetPixel(i,j) = Pixel(mag,mag,mag);
 		}
 	}
 	this->data.raw = img->data.raw;
+	// img->~Image();
 	return;
 }
 
 Image* Image::Scale(double sx, double sy){
 	/* WORK HERE */
-	int new_w = (int) width*sx;
-	int new_h = (int) height*sy;
+	int new_w = Width()*sx;
+	int new_h = Height()*sy;
 	Image *img = new Image(new_w,new_h);
-	int x_ratio = width / new_w;
-	int y_ratio = height / new_h;
+	double r = max(1/sx,1/sy);
 
-	SetSamplingMethod(0);
 	for (int x = 0; x < new_w; x++) {
 		for (int y = 0; y < new_h; y++) {
-			double u = x*x_ratio;
-			double v = y*y_ratio;
-			Pixel p = Sample(u,v);
-			img->SetPixel(x,y, p);
+
+			// double u = ((double)x / sx);
+			// double v = ((double)y / sy);
+			// Pixel p = GetPixel((int)u,(int)v);
+
+			double u = ((double)x * sx) / (double)width;
+			double v = ((double)x * sy) / (double)height;
+			Pixel p = Sample(u,v);	// return GetPixel((int)u*width, (int)v*height);
+
+
+			img->GetPixel(x,y) = p;
 		}
 	}
 	return img;
@@ -553,15 +509,26 @@ Image* Image::Rotate(double angle){
 
 	Image *img = new Image(new_w,new_h);
 	double x,y;
-	SetSamplingMethod(0);
-	for (int i = 0; i < new_w; i++) {
-		for (int j = 0; j < new_h; j++) {
-			x = i*cos(angle) - j*sin(angle);
-			y = i*sin(angle) + j*cos(angle);
+
+	for (int i = 0; i < Width(); i++) {
+		for (int j = 0; j < Height(); j++) {
+			x = i*cos(angle) + j*sin(angle);
+			y = j*cos(angle) - i*sin(angle);
 			img->Sample(x,y) = GetPixel(i,j);
-			// img->SetPixel(i,j,Sample(x,y));
-		} // ^ (x,y) of the new image = GetPixel(i,j) ??
+			// Pixel p = img->Sample(x,y);
+		}
 	}
+
+	// for (int i = 0; i < new_w; i++) {
+	// 	for (int j = 0; j < new_h; j++) {
+	// 		x = i*cos(-angle) - j*sin(-angle);	// negative angle?
+	// 		y = i*sin(-angle) + j*cos(-angle);
+	// 		img->GetPixel(i,j) = GetPixel((int)x,(int)y);
+	// 		// img->GetPixel(i,j) = Sample(x,y);
+	// 		// img->SetPixel(i,j,Sample(x,y));
+	// 	} // ^ (x,y) of the new image = GetPixel(i,j) ??
+	// }
+
 	return img;
 }
 
@@ -586,6 +553,36 @@ Pixel Image::Sample (double u, double v){
 	   }
 	   return GetPixel((int)u*width, (int)v*height);
    } else if (sampling_method == IMAGE_SAMPLING_BILINEAR) {
+	   int x = (int) u;
+	   int y = (int) v;
+		Pixel p1,p2,p3,p4;
+
+	   Pixel p1 = GetPixel(x,y);
+
+	   if (x+1 < Width()) {
+		   Pixel p2 = GetPixel(x+1, y);
+	   } else {
+		   Pixel p2 = GetPixel(x-1, y);
+	   }
+
+	   if (y+1 < Height()) {
+		   Pixel p3 = GetPixel(x, y+1);
+	   } else {
+		   Pixel p3 = GetPixel(x, y-1);
+	   }
+
+	   if ((x+1 < Width()) && (y+1 < Height())) {
+	   	   Pixel p4 = GetPixel(x+1, y+1);
+	   } else {
+		   Pixel p4 = GetPixel(x-1,y-1);
+	   }
+
+	   double bi_x = u - x;
+	   double bi_y = v - y;
+
+	   Pixel p = PixelLerp(PixelLerp(p1,p2,bi_x), PixelLerp(p3,p4,bi_x),bi_y);
+	   return p;
+	   
 	   // Get 4 nearest pixels
 	   // return the bilinear average
 	   
@@ -597,19 +594,14 @@ Pixel Image::Sample (double u, double v){
 
 	   for (int i = -1; i <= 1; i++) {
 		   for (int j = -1; j <= 1; j++) {
-				if ((x+i < 0) || (x+i+1 >= Width()) || (y+j < 0) || (y+j+1 >= Height())) {
-					r += 0;
-					g += 0;
-					b += 0;
-				} else {
-					if ((ValidCoord(x+i,y+j)) == 0) {
-						printf("\npoint (%d,%d), width=%d  height=%d\n\n",x+i,y+j,width,height);
-					}
+				if ((x+i >= 0) || (x+i+1 < Width()) || (y+j >= 0) || (y+j+1 < Height())) {
 					Pixel cur = GetPixel(x+i, y+j);
-					float weight = (1/sqrt(2*M_PI))*exp(i/2);
+					float weight = exp(-(x*x + y*y) / 2);
 			   		r += weight * cur.r;
 			   		g += weight * cur.g;
 			   		b += weight * cur.b;
+
+					sum += weight;
 				}
 		   }
 	   }
@@ -618,11 +610,13 @@ Pixel Image::Sample (double u, double v){
 	   g /= sum;
 	   b /= sum;
 
-	   r = ComponentClamp(r);
-	   g = ComponentClamp(g);
-	   b = ComponentClamp(b);
+	   Pixel n = ((int)r, (int)g, (int)b);
 
-	   return Pixel(r,g,b);
+	   n.r = ComponentClamp(r);
+	   n.g = ComponentClamp(g);
+	   n.b = ComponentClamp(b);
+
+	   return n;
    }
 
    return Pixel();
