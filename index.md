@@ -17,7 +17,7 @@
 
 **Floyd-Steinberg Dither:** This went pretty well once I understood what the quantization error really was. The code looks kinda ugly, but I needed to visualize what was happening with each pixel.
 
-**Scale:** I encountered some problems with indexing.
+**Scale:** I encountered some problems with indexing. When I was calculating the x and y indices to Sample the original image with, I was dividing by both widths, so my doubles were rounding down to 0, giving me a solid colored image. I needed to just divide by the new width, and adjust the point sampling function to clamp at width - 1.  (height was the same way with everything as well).
 
 **Rotate:** I encountered some problems with indexing.
 
@@ -62,12 +62,11 @@ Added:
 ![floyd_dither_jelly](https://user-images.githubusercontent.com/59031606/108916965-a2e02280-75f4-11eb-8aac-58cafcb4756a.jpg)
 
 **Scale**
-`./image -input JellyFish.jpg -FloydSteinbergDither 1 -output scaled_jelly.jpg`
+`./image -input JellyFish.jpg -scale 0.5 0.5 -output scaled_jelly.jpg`
+![baby_jelly](https://user-images.githubusercontent.com/59031606/108935624-ab942100-7613-11eb-92ca-84f43bd4d9d3.png)
 
 **Rotate**
 `./image -input JellyFish.jpg -FloydSteinbergDither 1 -output rotate_jelly.jpg`
-
-**Sample**
 
 **Ordered Dither**
 `./image -input JellyFish.jpg -orderedDither 5 -output ordered_jelly.jpg`
