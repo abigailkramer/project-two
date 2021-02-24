@@ -72,6 +72,7 @@ Added:
 **Scale**
 
 `./image -input JellyFish.jpg -scale 0.5 0.5 -output scaled_jelly.jpg`
+
 ![baby_jelly](https://user-images.githubusercontent.com/59031606/108935624-ab942100-7613-11eb-92ca-84f43bd4d9d3.png)
 
 **Rotate**
