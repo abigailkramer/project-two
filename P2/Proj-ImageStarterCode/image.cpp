@@ -450,21 +450,12 @@ Image* Image::Scale(double sx, double sy){
 	int new_w = Width()*sx;
 	int new_h = Height()*sy;
 	Image *img = new Image(new_w,new_h);
-	double r = max(1/sx,1/sy);
 
 	for (int x = 0; x < new_w; x++) {
 		for (int y = 0; y < new_h; y++) {
-
-			// double u = ((double)x / sx);
-			// double v = ((double)y / sy);
-			// Pixel p = GetPixel((int)u,(int)v);
-
-			double u = ((double)x * sx) / (double)width;
-			double v = ((double)x * sy) / (double)height;
-			Pixel p = Sample(u,v);	// return GetPixel((int)u*width, (int)v*height);
-
-
-			img->GetPixel(x,y) = p;
+			double u = ((double)x / (double)(new_w-1));
+			double v = ((double)y / (double)(new_h-1));
+			img->SetPixel(x,y,Sample(u,v));
 		}
 	}
 	return img;
@@ -475,7 +466,8 @@ Image* Image::Rotate(double angle){
 	int new_w = 0; // rotate four corners (0,0) (0,height-1) (width-1,0) (width-1,height-1)
 	int new_h = 0;
 
-	// double radians = (angle * M_PI) / 180;  // maybe replace angle w/
+	// double x = (int)(xpos*cos(-angle) - ypos*sin(-angle));	// rotate
+	// double y = (int)(xpos*sin(-angle) + ypos*cos(-angle));
 
 	int one_x = (int) (0*cos(angle) - 0*sin(angle));
 	int one_y = (int) (0*cos(angle) + 0*sin(angle));
@@ -504,30 +496,33 @@ Image* Image::Rotate(double angle){
 	printf("P3 (%d,%d)\n",three_x,three_y);
 	printf("P4 (%d,%d)\n",four_x,four_y);
 
-	new_w = maxx - minx;
-	new_h = maxy - miny;
+	new_w = (maxx - minx);
+	new_h = (maxy - miny);
+	printf("old width: %d, old height: %d\n",width,height);
+	printf("new width: %d, new height: %d\n",new_w,new_h);
 
 	Image *img = new Image(new_w,new_h);
-	double x,y;
 
-	for (int i = 0; i < Width(); i++) {
-		for (int j = 0; j < Height(); j++) {
-			x = i*cos(angle) + j*sin(angle);
-			y = j*cos(angle) - i*sin(angle);
-			img->Sample(x,y) = GetPixel(i,j);
-			// Pixel p = img->Sample(x,y);
+	for (int i = 0; i < new_w; i++) {
+		for (int j = 0; j < new_h; j++) {
+			double xpos = new_w/2-i;				// dist from origin
+			double ypos = j - new_h/2;				// ^^ ditto
+
+			double x = (int)(xpos*cos(-angle) - ypos*sin(-angle));	// rotate
+			double y = (int)(xpos*sin(-angle) + ypos*cos(-angle));
+
+			x = i/2-x;								// go back
+			y = y+j/2;
+
+			if ((x >= 0) && (x < width) && (y >= 0) && (y < height)) {
+				x /= (width);
+				y /= (height);
+				img->SetPixel(i,j,Sample(x,y));
+			} else {
+				img->SetPixel(i,j, Pixel(0,0,0));
+			}
 		}
 	}
-
-	// for (int i = 0; i < new_w; i++) {
-	// 	for (int j = 0; j < new_h; j++) {
-	// 		x = i*cos(-angle) - j*sin(-angle);	// negative angle?
-	// 		y = i*sin(-angle) + j*cos(-angle);
-	// 		img->GetPixel(i,j) = GetPixel((int)x,(int)y);
-	// 		// img->GetPixel(i,j) = Sample(x,y);
-	// 		// img->SetPixel(i,j,Sample(x,y));
-	// 	} // ^ (x,y) of the new image = GetPixel(i,j) ??
-	// }
 
 	return img;
 }
@@ -548,14 +543,26 @@ void Image::SetSamplingMethod(int method){
 Pixel Image::Sample (double u, double v){
    /* WORK HERE */
    if (sampling_method == IMAGE_SAMPLING_POINT) {
-	   if ((ValidCoord((int)u*width, (int)v*height)) == 0) {
+	   int x = (int)(u*width);
+	   int y = (int)(v*height);
+
+	   if (x > width-1) {
+		   x = width-1;
+	   }
+	   if (y > height-1) {
+		   y = height-1;
+	   }
+
+	   if (ValidCoord(x, y) == 0) {
 		   printf("\npoint (%d,%d), width=%d  height=%d\n\n",((int)u*width), ((int)v*height), width, height);
 	   }
-	   return GetPixel((int)u*width, (int)v*height);
+	   
+	   return GetPixel(x,y);
+
    } else if (sampling_method == IMAGE_SAMPLING_BILINEAR) {
-	   int x = (int) u;
-	   int y = (int) v;
-		Pixel p1,p2,p3,p4;
+	   int x = (int) (u*width);
+	   int y = (int) (v*height);
+		Pixel p2,p3,p4;
 
 	   Pixel p1 = GetPixel(x,y);
 
@@ -587,8 +594,8 @@ Pixel Image::Sample (double u, double v){
 	   // return the bilinear average
 	   
    } else if (sampling_method == IMAGE_SAMPLING_GAUSSIAN) {
-	   int x = (int) u;
-	   int y = (int) v;
+	   int x = (int) (u*width);
+	   int y = (int) (v*height);
 	   double r,g,b = 0.0;
 	   double sum = 0.0;
 
