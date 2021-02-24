@@ -29,7 +29,7 @@ Added:
 **Original Image:**
 ![JellyFish](https://user-images.githubusercontent.com/59031606/108917069-c86d2c00-75f4-11eb-837c-1c95ceeba257.jpg)
 
-**Random Noies**
+**Random Noise**
 
 `./image -input JellyFish.jpg -noise 0.5 -output noisy_jelly.jpg`
 
