@@ -81,15 +81,15 @@ Added:
 
 **Scale - Triplet of Images (with point sampling)**
 
-`./image -input JellyFish.jpg -scale 0.75 0.75 -output one_jelly.jpg`
+`./image -input JellyFish.jpg -sampling 0 -scale 0.75 0.75 -output one_jelly.jpg`
 
 ![average_jelly](https://user-images.githubusercontent.com/59031606/108938416-a8019980-7615-11eb-9f4e-f348c21015c9.jpg)
 
-`./image -input JellyFish.jpg -scale 0.5 0.5 -output two_jelly.jpg`
+`./image -input JellyFish.jpg -sampling 0 -scale 0.5 0.5 -output two_jelly.jpg`
 
 ![baby_jelly](https://user-images.githubusercontent.com/59031606/108935624-ab942100-7613-11eb-92ca-84f43bd4d9d3.png)
 
-`./image -input JellyFish.jpg -scale 0.25 0.25 -output three_jelly.jpg`
+`./image -input JellyFish.jpg -sampling 0 -scale 0.25 0.25 -output three_jelly.jpg`
 
 ![smaller_jelly](https://user-images.githubusercontent.com/59031606/108938439-af28a780-7615-11eb-9ae8-3d912b30f295.jpg)
 
