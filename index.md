@@ -104,9 +104,13 @@ Added:
 
 `./image -input JellyFish.jpg -sampling 1 -scale 0.5 0.5 -output bilinear_jelly.jpg`
 
+![bilinear_jelly](https://user-images.githubusercontent.com/59031606/109203778-2ff8b800-776a-11eb-98a7-0669a2c2935b.jpg)
+
 **Sample - Gaussian**
 
 `./image -input JellyFish.jpg -sampling 2 -scale 0.5 0.5 -output gaussian_jelly.jpg`
+
+![gaussian_jelly](https://user-images.githubusercontent.com/59031606/109203810-36872f80-776a-11eb-901b-d952df99396c.jpg)
 
 
 **Ordered Dither**
