@@ -104,7 +104,7 @@ Added:
 
 `./image -input JellyFish.jpg -sampling 1 -scale 0.5 0.5 -output bilinear_jelly.jpg`
 
-**Sample - Gaussian*
+**Sample - Gaussian**
 
 `./image -input JellyFish.jpg -sampling 2 -scale 0.5 0.5 -output gaussian_jelly.jpg`
 
