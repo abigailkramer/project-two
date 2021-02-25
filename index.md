@@ -19,7 +19,7 @@
 
 **Scale:** I encountered some problems with indexing. When I was calculating the x and y indices to Sample the original image with, I was dividing by both widths, so my doubles were rounding down to 0, giving me a solid colored image. I needed to just divide by the new width, and adjust the point sampling function to clamp at width - 1.  (height was the same way with everything as well).
 
-**Rotate:** I encountered some problems with indexing.
+**Rotate:** Like scaling, I encountered some problems with indexing. Once that was sorted, I encountered some offset with the resulting image that I couldn't quite correct in time.
 
 **Sampling:** I was a little confused with the bilinear sampling. The gaussian went fine - I had completed the Blur function before working on this.
 
@@ -79,7 +79,7 @@ Added:
 
 ![floyd_dither_jelly](https://user-images.githubusercontent.com/59031606/108916965-a2e02280-75f4-11eb-8aac-58cafcb4756a.jpg)
 
-**Scale - Triplet of Images**
+**Scale - Triplet of Images (with point sampling)**
 
 `./image -input JellyFish.jpg -scale 0.75 0.75 -output one_jelly.jpg`
 
@@ -99,6 +99,14 @@ Added:
 `./image -input JellyFish.jpg -rotate 0.8 -output rotate_jelly.jpg`
 
 ![turnt_jelly](https://user-images.githubusercontent.com/59031606/109109478-03f21e00-76fb-11eb-986a-aa2dfedea053.jpg)
+
+**Sample - Bilinear**
+
+`./image -input JellyFish.jpg -sampling 1 -scale 0.5 0.5 -output bilinear_jelly.jpg`
+
+**Sample - Gaussian*
+
+`./image -input JellyFish.jpg -sampling 2 -scale 0.5 0.5 -output gaussian_jelly.jpg`
 
 
 **Ordered Dither**
