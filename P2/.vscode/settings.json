@@ -2,6 +2,7 @@
     "files.associations": {
         "cmath": "cpp",
         "algorithm": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "xiosbase": "cpp"
     }
 }

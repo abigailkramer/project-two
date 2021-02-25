@@ -171,13 +171,7 @@ void Image::AddNoise (double factor){
 			Pixel p = GetPixel(i,j);
 			Pixel noise = p;
 
-			// double n = (((double)rand()*(0.5 - (-0.5)) / RAND_MAX) -0.5);
-
 			noise = noise + PixelRandom()*factor;
-
-			// noise.r = noise.r + ComponentRandom()*factor;
-			// noise.g = noise.g + ComponentRandom()*factor;
-			// noise.b = noise.b + ComponentRandom()*factor;
 			
 			noise.SetClamp(noise.r,noise.g,noise.b);
 			GetPixel(i,j) = noise;
@@ -463,63 +457,52 @@ Image* Image::Scale(double sx, double sy){
 
 Image* Image::Rotate(double angle){
 	/* WORK HERE */
-	int new_w = 0; // rotate four corners (0,0) (0,height-1) (width-1,0) (width-1,height-1)
-	int new_h = 0;
 
-	// double x = (int)(xpos*cos(-angle) - ypos*sin(-angle));	// rotate
-	// double y = (int)(xpos*sin(-angle) + ypos*cos(-angle));
+	double x0 = 0.5 * (width - 1);     		// point to rotate about
+    double y0 = 0.5 * (height - 1);	 		// center of image
 
-	int one_x = (int) (0*cos(angle) - 0*sin(angle));
-	int one_y = (int) (0*cos(angle) + 0*sin(angle));
+	double one_x = ((0-x0)*cos(angle) - (0-y0)*sin(angle));
+	double one_y = ((0-y0)*cos(angle) + (0-x0)*sin(angle));
 
-	int two_x = (int) (0*cos(angle) - (height-1)*sin(angle));
-	int two_y = (int) ((height-1)*cos(angle) + 0*sin(angle));
+	double two_x = ((0-x0)*cos(angle) - ((height-1)-y0)*sin(angle));
+	double two_y = (((height-1)-y0)*cos(angle) + (0-x0)*sin(angle));
 
-	int three_x = (int) ((width-1)*cos(angle) - 0*sin(angle));
-	int three_y = (int) (0*cos(angle) + (width-1)*sin(angle));
+	double three_x = (((width-1)-x0)*cos(angle) - (0-y0)*sin(angle));
+	double three_y = ((0-y0)*cos(angle) + ((width-1)-x0)*sin(angle));
 
-	int four_x = (int) ((width-1)*cos(angle) - (height-1)*sin(angle));
-	int four_y = (int) ((height-1)*cos(angle) + (width-1)*sin(angle));
+	double four_x = (((width-1)-x0)*cos(angle) - ((height-1)-y0)*sin(angle));
+	double four_y = (((height-1)-y0)*cos(angle) + ((width-1)-x0)*sin(angle));
 
-	int minx = min(min(one_x,two_x), min(three_x,four_x));
-	int maxx = max(max(one_x,two_x), max(three_x,four_x));
-	int miny = min(min(one_y,two_y), min(three_y,four_y));
-	int maxy = max(max(one_y,two_y), max(three_y,four_y));
+	double minx = min(min(one_x,two_x), min(three_x,four_x));
+	double maxx = max(max(one_x,two_x), max(three_x,four_x));
+	double miny = min(min(one_y,two_y), min(three_y,four_y));
+	double maxy = max(max(one_y,two_y), max(three_y,four_y));
 
-	printf("min x: %d\n",minx);
-	printf("max x: %d\n",maxx);
-	printf("min y: %d\n",miny);
-	printf("max y: %d\n",maxy);
+	int new_w = (int)(maxx - minx);
+	int new_h = (int)(maxy - miny);
 
-	printf("P1 (%d,%d)\n",one_x,one_y);
-	printf("P2 (%d,%d)\n",two_x,two_y);
-	printf("P3 (%d,%d)\n",three_x,three_y);
-	printf("P4 (%d,%d)\n",four_x,four_y);
-
-	new_w = (maxx - minx);
-	new_h = (maxy - miny);
-	printf("old width: %d, old height: %d\n",width,height);
-	printf("new width: %d, new height: %d\n",new_w,new_h);
+	double new_x0 = 0.5 * (new_w-1);
+	double new_y0 = 0.5 * (new_h-1);
 
 	Image *img = new Image(new_w,new_h);
 
 	for (int i = 0; i < new_w; i++) {
 		for (int j = 0; j < new_h; j++) {
-			double xpos = new_w/2-i;				// dist from origin
-			double ypos = j - new_h/2;				// ^^ ditto
+			double x_off = (double)i-x0;
+			double y_off = (double)j-y0;
 
-			double x = (int)(xpos*cos(-angle) - ypos*sin(-angle));	// rotate
-			double y = (int)(xpos*sin(-angle) + ypos*cos(-angle));
+			double x = (x_off*cos(-angle) - y_off*sin(-angle));	// rotate
+			double y = (x_off*sin(-angle) + y_off*cos(-angle));
 
-			x = i/2-x;								// go back
-			y = y+j/2;
+			x += (((double)new_w-1)/2) - x0;
+			y += (((double)new_h-1)/2) - y0;
 
 			if ((x >= 0) && (x < width) && (y >= 0) && (y < height)) {
-				x /= (width);
-				y /= (height);
+				x /= (width-1);
+				y /= (height-1);
 				img->SetPixel(i,j,Sample(x,y));
 			} else {
-				img->SetPixel(i,j, Pixel(0,0,0));
+				img->SetPixel(i,j, Pixel(200,200,200,0));
 			}
 		}
 	}
@@ -546,68 +529,65 @@ Pixel Image::Sample (double u, double v){
 	   int x = (int)(u*width);
 	   int y = (int)(v*height);
 
-	   if (x > width-1) {
-		   x = width-1;
-	   }
-	   if (y > height-1) {
-		   y = height-1;
-	   }
-
-	   if (ValidCoord(x, y) == 0) {
-		   printf("\npoint (%d,%d), width=%d  height=%d\n\n",((int)u*width), ((int)v*height), width, height);
-	   }
+	   x = ((x > width-1) ? width-1 : x);
+	   y = ((y > height-1) ? height-1 : y);
 	   
 	   return GetPixel(x,y);
 
    } else if (sampling_method == IMAGE_SAMPLING_BILINEAR) {
-	   int x = (int) (u*width);
-	   int y = (int) (v*height);
-		Pixel p2,p3,p4;
+	    double x = (u*width);
+	    double y = (v*height);
 
-	   Pixel p1 = GetPixel(x,y);
+	    x = ((x > width-1) ? width-1 : x);
+	    y = ((y > height-1) ? height-1 : y);
 
-	   if (x+1 < Width()) {
-		   Pixel p2 = GetPixel(x+1, y);
-	   } else {
-		   Pixel p2 = GetPixel(x-1, y);
-	   }
+		int pixels = 0;
+		float r,g,b = 0;
 
-	   if (y+1 < Height()) {
-		   Pixel p3 = GetPixel(x, y+1);
-	   } else {
-		   Pixel p3 = GetPixel(x, y-1);
-	   }
+		for (int i = -1; i <=1; i+=2) {
+			for (int j = -1; j <=1; j+=2) {
+				if ((x+i >= 0) && (x+i < width) && (y+j >= 0) && (y+j < height)) {
+					Pixel cur = GetPixel(x+i,y+j);
+					r += cur.r;
+					g += cur.g;
+					b += cur.b;
 
-	   if ((x+1 < Width()) && (y+1 < Height())) {
-	   	   Pixel p4 = GetPixel(x+1, y+1);
-	   } else {
-		   Pixel p4 = GetPixel(x-1,y-1);
-	   }
+					pixels++;
+				}
+			}
+		}
 
-	   double bi_x = u - x;
-	   double bi_y = v - y;
+		r /= pixels;
+		g /= pixels;
+	    b /= pixels;
 
-	   Pixel p = PixelLerp(PixelLerp(p1,p2,bi_x), PixelLerp(p3,p4,bi_x),bi_y);
-	   return p;
-	   
-	   // Get 4 nearest pixels
-	   // return the bilinear average
+	    Pixel n = ((int)r, (int)g, (int)b);
+
+	    n.r = ComponentClamp(r);
+	    n.g = ComponentClamp(g);
+	    n.b = ComponentClamp(b);
+	    return n;
 	   
    } else if (sampling_method == IMAGE_SAMPLING_GAUSSIAN) {
-	   int x = (int) (u*width);
-	   int y = (int) (v*height);
-	   double r,g,b = 0.0;
-	   double sum = 0.0;
+	   int x = (int)(u*width);
+	   int y = (int)(v*height);
+
+	   x = ((x > width-1) ? width-1 : x);
+	   y = ((y > height-1) ? height-1 : y);
+
+	   float r,g,b = 0.0;
+	   float sum = 0.0;
 
 	   for (int i = -1; i <= 1; i++) {
 		   for (int j = -1; j <= 1; j++) {
-				if ((x+i >= 0) || (x+i+1 < Width()) || (y+j >= 0) || (y+j+1 < Height())) {
+			   int new_x = i+x;
+			   int new_y = j+y;
+			   if ((new_y >= 0) && (new_x >= 0) && (new_y+1 < Height()) && (new_x+1 < Width())) {
 					Pixel cur = GetPixel(x+i, y+j);
-					float weight = exp(-(x*x + y*y) / 2);
+					float weight = exp(-(i*i + j*j) / 2);
 			   		r += weight * cur.r;
 			   		g += weight * cur.g;
 			   		b += weight * cur.b;
-
 					sum += weight;
 				}
 		   }
@@ -624,6 +604,7 @@ Pixel Image::Sample (double u, double v){
 	   n.b = ComponentClamp(b);
 
 	   return n;
+
    }
 
    return Pixel();
