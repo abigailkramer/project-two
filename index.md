@@ -26,7 +26,9 @@
 Added: 
 - **Ordered Dither**
 
+
 **Original Image:**
+
 ![JellyFish](https://user-images.githubusercontent.com/59031606/108917069-c86d2c00-75f4-11eb-837c-1c95ceeba257.jpg)
 
 **Random Noise**
@@ -94,7 +96,10 @@ Added:
 
 **Rotate**
 
-`./image -input JellyFish.jpg -FloydSteinbergDither 1 -output rotate_jelly.jpg`
+`./image -input JellyFish.jpg -rotate 0.8 -output rotate_jelly.jpg`
+
+![turnt_jelly](https://user-images.githubusercontent.com/59031606/109109478-03f21e00-76fb-11eb-986a-aa2dfedea053.jpg)
+
 
 **Ordered Dither**
 
