@@ -19,7 +19,7 @@
 
 **Scale:** I encountered some problems with indexing. When I was calculating the x and y indices to Sample the original image with, I was dividing by both widths, so my doubles were rounding down to 0, giving me a solid colored image. I needed to just divide by the new width, and adjust the point sampling function to clamp at width - 1.  (height was the same way with everything as well).
 
-**Rotate:** Like scaling, I encountered some problems with indexing. Once that was sorted, I encountered some offset with the resulting image that I couldn't quite correct in time.
+**Rotate:** Like scaling, I encountered some problems with indexing. Once that was sorted, I encountered some offset with the resulting image that I needed to account for by centering the rotation around the origin, and adjusting the rotated point before sampling.
 
 **Sampling:** I was a little confused with the bilinear sampling. The gaussian went fine - I had completed the Blur function before working on this.
 
