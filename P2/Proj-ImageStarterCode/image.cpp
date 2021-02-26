@@ -341,8 +341,8 @@ void Image::Blur(int n){
 			r=g=b=0.0;
 			float div = 0.0;
 
-			for (int x = -n; x <= n; x++) {
-				for (int y = -n; y <= n; y++) {
+			for (int x = -size; x <= size; x++) {
+				for (int y = -size; y <= size; y++) {
 					int new_x = i+x;
 					int new_y = j+y;
 
@@ -488,14 +488,14 @@ Image* Image::Rotate(double angle){
 
 	for (int i = 0; i < new_w; i++) {
 		for (int j = 0; j < new_h; j++) {
-			double x_off = (double)i-x0;
-			double y_off = (double)j-y0;
+			double x_off = (double)i-new_x0;
+			double y_off = (double)j-new_y0;
 
 			double x = (x_off*cos(-angle) - y_off*sin(-angle));	// rotate
 			double y = (x_off*sin(-angle) + y_off*cos(-angle));
 
-			x += (((double)new_w-1)/2) - x0;
-			y += (((double)new_h-1)/2) - y0;
+			x += (((double)width-1)/2);
+			y += (((double)height-1)/2);
 
 			if ((x >= 0) && (x < width) && (y >= 0) && (y < height)) {
 				x /= (width-1);
