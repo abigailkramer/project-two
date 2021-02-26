@@ -98,7 +98,7 @@ Added:
 
 `./image -input JellyFish.jpg -rotate 0.8 -output rotate_jelly.jpg`
 
-![turnt_jelly](https://user-images.githubusercontent.com/59031606/109109478-03f21e00-76fb-11eb-986a-aa2dfedea053.jpg)
+![rotate_jelly](https://user-images.githubusercontent.com/59031606/109265750-ac23e780-77cc-11eb-9921-d8b5dca29ff6.jpg)
 
 **Sample - Bilinear**
 
