@@ -578,8 +578,8 @@ Pixel Image::Sample (double u, double v){
 	   float r,g,b = 0.0;
 	   float sum = 0.0;
 
-	   for (int i = -1; i <= 1; i++) {
-		   for (int j = -1; j <= 1; j++) {
+	   for (int i = -2; i <= 2; i++) {
+		   for (int j = -2; j <= 2; j++) {
 			   int new_x = i+x;
 			   int new_y = j+y;
 			   if ((new_y >= 0) && (new_x >= 0) && (new_y+1 < Height()) && (new_x+1 < Width())) {
