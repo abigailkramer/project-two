@@ -373,8 +373,16 @@ void Image::Blur(int n){
 		}
 	}
 
-	this->data.raw = img->data.raw;
-	// img->~Image();
+	this->width           = img->width;
+	this->height          = img->height;
+	this->num_pixels      = width * height;
+	this->sampling_method = IMAGE_SAMPLING_POINT;
+	
+	this->data.raw = new uint8_t[num_pixels*4];
+	memcpy(this->data.raw, img->data.raw, num_pixels*sizeof(Pixel));
+	
+	img->~Image();
+
 	return;
 }
 
@@ -434,8 +442,18 @@ void Image::EdgeDetect(){
 			img->GetPixel(i,j) = Pixel(mag,mag,mag);
 		}
 	}
-	this->data.raw = img->data.raw;
-	// img->~Image();
+
+
+	this->width           = img->width;
+	this->height          = img->height;
+	this->num_pixels      = width * height;
+	this->sampling_method = IMAGE_SAMPLING_POINT;
+	
+	this->data.raw = new uint8_t[num_pixels*4];
+	memcpy(this->data.raw, img->data.raw, num_pixels*sizeof(Pixel));
+	
+	img->~Image();
+
 	return;
 }
 
